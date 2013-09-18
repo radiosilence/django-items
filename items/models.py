@@ -62,7 +62,7 @@ class BaseCategory(Slugged, Named, models.Model):
         abstract = True
 
 
-class BaseItemClass(Slugged, Named, models.Model):
+class BaseItem(Slugged, Named, models.Model):
     """ This is the model it all revolves around. """
     item_type = models.CharField(verbose_name=_('Item Type'),
         max_length=2, choices=ITEM_TYPES, default="UN")
@@ -81,33 +81,6 @@ class BaseItemClass(Slugged, Named, models.Model):
     class Meta:
         verbose_name = _('Item Class')
         verbose_name_plural = _('Item Classes')
-        abstract = True
-
-
-class BaseItem(models.Model):
-    label = models.CharField(verbose_name=_('Label'), max_length=255,
-        null=True, blank=True)
-    base_stock = models.PositiveIntegerField(verbose_name=_('Base Stock'),
-        default=1)
-    num_damaged = models.PositiveIntegerField(verbose_name=_('Number Damaged'),
-        default=1)
-    num_missing = models.PositiveIntegerField(verbose_name=_('Number Missing'),
-        default=1)
-    num_discarded = models.PositiveIntegerField(verbose_name=_('Number Discard'),
-        default=1)
-
-    @property
-    def available_stock(self):
-        return self.base_stock - (
-            self.num_damaged + self.num_missing + self.num_discarded
-        )
-
-    def available_on_date(self, date):
-        pass
-
-    class Meta:
-        verbose_name = _('Item')
-        verbose_name_plural = _('Items')
         abstract = True
 
 
@@ -136,7 +109,7 @@ class BaseItemAttribute(Ordered, models.Model):
 
 class BaseItemImage(Named, Ordered, models.Model):
     image = ImageField(verbose_name=_('Image'), upload_to='item_image')
-    item_class = models.ForeignKey(get_model_name('ItemClass'), related_name='photos')
+    item_class = models.ForeignKey(get_model_name('Item'), related_name='photos')
 
     def __unicode__(self):
         return self.image
@@ -147,37 +120,70 @@ class BaseItemImage(Named, Ordered, models.Model):
         abstract = True
 
 
+class BaseItemInstance(models.Model):
+    label = models.CharField(verbose_name=_('Label'), max_length=255,
+        null=True, blank=True)
+    base_stock = models.PositiveIntegerField(verbose_name=_('Base Stock'),
+        default=1)
+    num_damaged = models.PositiveIntegerField(verbose_name=_('Number Damaged'),
+        default=1)
+    num_missing = models.PositiveIntegerField(verbose_name=_('Number Missing'),
+        default=1)
+    num_discarded = models.PositiveIntegerField(verbose_name=_('Number Discard'),
+        default=1)
 
-class Manufacturer(BaseManufacturer):
+    @property
+    def available_stock(self):
+        return self.base_stock - (
+            self.num_damaged + self.num_missing + self.num_discarded
+        )
+
+    def available_on_date(self, date):
+        pass
+
     class Meta:
-        managed = is_default('Manufacturer')
+        verbose_name = _('Item')
+        verbose_name_plural = _('Items')
+        abstract = True
 
 
-class Category(BaseCategory):
-    class Meta:
-        managed = is_default('Category')
+if is_default('Manufacturer'):
+    class Manufacturer(BaseManufacturer):
+        class Meta:
+            managed = is_default('Manufacturer')
 
 
-class ItemClass(BaseItemClass):
-    class Meta:
-        managed = is_default('ItemClass')
+if is_default('Category'):
+    class Category(BaseCategory):
+        class Meta:
+            managed = is_default('Category')
 
 
-class Item(BaseItem):
-    class Meta:
-        managed = is_default('Item')
+if is_default('Item'):
+    class Item(BaseItem):
+        class Meta:
+            managed = is_default('Item')
 
 
-class ItemAttributeClass(BaseItemAttributeClass):
-    class Meta:
-        managed = is_default('ItemAttributeClass')
+if is_default('ItemAttributeClass'):
+    class ItemAttributeClass(BaseItemAttributeClass):
+        class Meta:
+            managed = is_default('ItemAttributeClass')
 
 
-class ItemAttribute(BaseItemAttribute):
-    class Meta:
-        managed = is_default('ItemAttribute')
+if is_default('ItemAttribute'):
+    class ItemAttribute(BaseItemAttribute):
+        class Meta:
+            managed = is_default('ItemAttribute')
 
 
-class ItemImage(BaseItemImage):
-    class Meta:
-        managed = is_default('ItemImage')
+if is_default('ItemImage'):
+    class ItemImage(BaseItemImage):
+        class Meta:
+            managed = is_default('ItemImage')
+
+
+if is_default('ItemInstance'):
+    class ItemInstance(BaseItemInstance):
+        class Meta:
+            managed = is_default('ItemInstance')

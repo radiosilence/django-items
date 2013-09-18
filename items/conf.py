@@ -7,11 +7,11 @@ settings.ITEMS_MODELS = getattr(settings, 'ITEMS_MODELS', {})
 MODELS = (
     'Manufacturer',
     'Category',
-    'ItemClass',
     'Item',
     'ItemAttributeClass',
     'ItemAttribute',
-    'ItemPhoto',
+    'ItemImage',
+    'ItemInstance',
 )
 
 DEFAULT_MODELS = []
