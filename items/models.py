@@ -130,6 +130,7 @@ class BaseItemAttributeClass(models.Model, Named):
     class Meta:
         verbose_name = _('Item Attribute Class')
         verbose_name = _('Item Attribute Classes')
+        abstract = True
 
 
 class ItemAttributeClass(BaseItemAttributeClass):
@@ -168,7 +169,6 @@ class BaseItemImage(models.Model, Named, Ordered):
         verbose_name_plural = _('Item Images')
         abstract = True
 
+
 class ItemImage(BaseItemImage):
     pass
-
-
