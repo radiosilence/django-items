@@ -1,5 +1,5 @@
 =============================
-items
+django-items
 =============================
 
 .. image:: https://badge.fury.io/py/items.png
@@ -17,14 +17,14 @@ Generic items that can do things. For use in stuff. Perhaps some CBVs.
 Documentation
 -------------
 
-The full documentation is at http://items.rtfd.org.
+The full documentation is at http://django-items.rtfd.org.
 
 Quickstart
 ----------
 
 Install items::
 
-    pip install -e git+https://github.com/radiosilence/items.git
+    pip install -e git+https://github.com/radiosilence/django-items.git
 
 Then use it in a project::
 

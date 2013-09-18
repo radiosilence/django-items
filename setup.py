@@ -24,13 +24,13 @@ readme = open('README.rst').read()
 history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 setup(
-    name='items',
+    name='django-items',
     version=version,
     description='Generic items that can do things. For use in stuff. Perhaps some CBVs.',
     long_description=readme + '\n\n' + history,
     author='James Cleveland',
     author_email='jc@blit.cc',
-    url='https://github.com/radiosilence/items',
+    url='https://github.com/radiosilence/django-items',
     packages=[
         'items',
     ],
@@ -39,7 +39,7 @@ setup(
     ],
     license="BSD",
     zip_safe=False,
-    keywords='items',
+    keywords='django-items',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Framework :: Django',
