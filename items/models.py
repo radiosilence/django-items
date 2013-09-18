@@ -39,7 +39,7 @@ class Ordered(models.Model):
         abstract = True
 
 
-class BaseManufacturer(models.Model, Named, Slugged):
+class BaseManufacturer(Slugged, Named, models.Model):
     """ The manufacturer of an item class """
 
     class Meta:
@@ -48,11 +48,11 @@ class BaseManufacturer(models.Model, Named, Slugged):
         abstract = True
 
 
-class Manufacturer(models.Model, Named, Slugged):
+class Manufacturer(Slugged, Named, models.Model):
     pass
 
 
-class BaseCategory(models.Model, Named, Slugged):
+class BaseCategory(Slugged, Named, models.Model):
     """ Category of the item class """
 
     parent = models.ForeignKey(get_model_name('Category'),
@@ -69,7 +69,7 @@ class Category(BaseCategory):
     pass
 
 
-class BaseItemClass(models.Model, Named, Slugged):
+class BaseItemClass(Slugged, Named, models.Model):
     """ This is the model it all revolves around. """
     item_type = models.CharField(verbose_name=_('Item Type'),
         max_length=2, choices=ITEM_TYPES, default="UN")
@@ -79,7 +79,7 @@ class BaseItemClass(models.Model, Named, Slugged):
         blank=True, null=True)
     unit_price = models.DecimalField(verbose_name=_('Unit Price'),
         max_digits=32, decimal_places=4)
-    manual = models.FileField(verbose_name=_('Manual')
+    manual = models.FileField(verbose_name=_('Manual'),
         upload_to='manuals', blank=True, null=True)
     category = models.ForeignKey(get_model_name('Category'),
         verbose_name=_('Category'), related_name='items')
@@ -126,7 +126,7 @@ class Item(BaseItem):
     pass
 
 
-class BaseItemAttributeClass(models.Model, Named):
+class BaseItemAttributeClass(Named, models.Model):
     class Meta:
         verbose_name = _('Item Attribute Class')
         verbose_name = _('Item Attribute Classes')
@@ -137,7 +137,7 @@ class ItemAttributeClass(BaseItemAttributeClass):
     pass
 
 
-class BaseItemAttribute(models.Model, Ordered):
+class BaseItemAttribute(Ordered, models.Model):
     cls = models.ForeignKey(get_model_name('ItemAttributeClass'),
         verbose_name=_('Class'),  related_name="attributes")
     text = models.TextField(verbose_name=_('Text'))
@@ -157,7 +157,7 @@ class ItemAttribute(BaseItemAttribute):
     pass
 
 
-class BaseItemImage(models.Model, Named, Ordered):
+class BaseItemImage(Named, Ordered, models.Model):
     image = ImageField(upload_to='items')
     item = models.ForeignKey(Item, related_name='photos')
 

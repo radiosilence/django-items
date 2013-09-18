@@ -4,10 +4,7 @@ from django.db.models.loading import get_model as _get_model
 settings.ITEMS = getattr(settings, 'ITEMS', {})
 settings.ITEMS_MODELS = getattr(settings, 'ITEMS', {})
 
-for model in models:
-    settings.ITEMS_MODELS[model] = settings.ITEMS_MODELS.get(model, ''.join('items.', model))
-
-models = (
+MODELS = (
     'Manufacturer',
     'Category',
     'ItemClass',
@@ -16,6 +13,10 @@ models = (
     'ItemAttribute',
     'ItemPhoto',
 )
+
+for model in MODELS:
+    settings.ITEMS_MODELS[model] = settings.ITEMS_MODELS.get(model, ''.join(['items.', model]))
+
 
 def get_model(model):
     return _get_model(*settings.ITEMS_MODELS.get(model).split('.'))
