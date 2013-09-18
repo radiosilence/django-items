@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from sorl.thumbnail import ImageField
 
-from items.conf import settings, get_model, get_model_name
+from items.conf import is_default, settings, get_model, get_model_name
 
 
 ITEM_TYPES = settings.ITEMS.get('ITEM_TYPES', (
@@ -48,10 +49,6 @@ class BaseManufacturer(Slugged, Named, models.Model):
         abstract = True
 
 
-class Manufacturer(Slugged, Named, models.Model):
-    pass
-
-
 class BaseCategory(Slugged, Named, models.Model):
     """ Category of the item class """
 
@@ -63,10 +60,6 @@ class BaseCategory(Slugged, Named, models.Model):
         verbose_name = _('Category')
         verbose_name_plural = _('Categories')
         abstract = True
-
-
-class Category(BaseCategory):
-    pass
 
 
 class BaseItemClass(Slugged, Named, models.Model):
@@ -89,10 +82,6 @@ class BaseItemClass(Slugged, Named, models.Model):
         verbose_name = _('Item Class')
         verbose_name_plural = _('Item Classes')
         abstract = True
-
-
-class ItemClass(BaseItemClass):
-    pass
 
 
 class BaseItem(models.Model):
@@ -122,19 +111,11 @@ class BaseItem(models.Model):
         abstract = True
 
 
-class Item(BaseItem):
-    pass
-
-
 class BaseItemAttributeClass(Named, models.Model):
     class Meta:
         verbose_name = _('Item Attribute Class')
         verbose_name = _('Item Attribute Classes')
         abstract = True
-
-
-class ItemAttributeClass(BaseItemAttributeClass):
-    pass
 
 
 class BaseItemAttribute(Ordered, models.Model):
@@ -153,13 +134,9 @@ class BaseItemAttribute(Ordered, models.Model):
         abstract = True
 
 
-class ItemAttribute(BaseItemAttribute):
-    pass
-
-
 class BaseItemImage(Named, Ordered, models.Model):
-    image = ImageField(upload_to='items')
-    item = models.ForeignKey(Item, related_name='photos')
+    image = ImageField(verbose_name=_('Image'), upload_to='item_image')
+    item = models.ForeignKey(get_model_name('Item'), related_name='photos')
 
     def __unicode__(self):
         return self.image
@@ -170,5 +147,37 @@ class BaseItemImage(Named, Ordered, models.Model):
         abstract = True
 
 
+
+class Manufacturer(BaseManufacturer):
+    class Meta:
+        managed = is_default('Manufacturer')
+
+
+class Category(BaseCategory):
+    class Meta:
+        managed = is_default('Category')
+
+
+class ItemClass(BaseItemClass):
+    class Meta:
+        managed = is_default('ItemClass')
+
+
+class Item(BaseItem):
+    class Meta:
+        managed = is_default('Item')
+
+
+class ItemAttributeClass(BaseItemAttributeClass):
+    class Meta:
+        managed = is_default('ItemAttributeClass')
+
+
+class ItemAttribute(BaseItemAttribute):
+    class Meta:
+        managed = is_default('ItemAttribute')
+
+
 class ItemImage(BaseItemImage):
-    pass
+    class Meta:
+        managed = is_default('ItemImage')
