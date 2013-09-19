@@ -92,6 +92,9 @@ class BaseItem(Slugged, Named, models.Model):
     def url_parts(self):
         return self.category.url_parts + [self.slug]
 
+    @property
+    def primary_image(self):
+        return self.images.all()[0]
 
     class Meta:
         verbose_name = _('Item Class')
