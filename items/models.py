@@ -40,7 +40,7 @@ class Ordered(models.Model):
         abstract = True
 
 
-class BaseManufacturer(Slugged, Named, models.Model):
+class BaseManufacturer(Named, Slugged, models.Model):
     """ The manufacturer of an item class """
 
     class Meta:
@@ -49,7 +49,7 @@ class BaseManufacturer(Slugged, Named, models.Model):
         abstract = True
 
 
-class BaseCategory(Slugged, Named, Ordered, MP_Node, models.Model):
+class BaseCategory(Named, Slugged, Ordered, MP_Node, models.Model):
     """ Category of the item class """
     node_order_by = ['order', 'name']
 
@@ -70,7 +70,7 @@ class BaseCategory(Slugged, Named, Ordered, MP_Node, models.Model):
         abstract = True
 
 
-class BaseItem(Slugged, Named, models.Model):
+class BaseItem(Named, Slugged, models.Model):
     """ This is the model it all revolves around. """
     item_type = models.CharField(verbose_name=_('Item Type'),
         max_length=2, choices=ITEM_TYPES, default="UN")
