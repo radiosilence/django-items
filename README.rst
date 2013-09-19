@@ -28,7 +28,7 @@ Install items::
 
 Then use it in a project::
 
-	Add items to INSTALLED_APPLICATIONS
+	Add items and treebeard to INSTALLED_APPLICATIONS
 
 Features
 --------

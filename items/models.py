@@ -2,7 +2,7 @@
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-
+from treebeard.mp_tree import MP_Node
 from sorl.thumbnail import ImageField
 
 from items.conf import is_default, settings, get_model, get_model_name
@@ -49,12 +49,20 @@ class BaseManufacturer(Slugged, Named, models.Model):
         abstract = True
 
 
-class BaseCategory(Slugged, Named, models.Model):
+class BaseCategory(Slugged, Named, Ordered, MP_Node, models.Model):
     """ Category of the item class """
+    node_order_by = ['order', 'name']
 
-    parent = models.ForeignKey(get_model_name('Category'),
-        verbose_name=_('Parent'), blank=True, null=True,
-        related_name='children')
+    @property
+    def url_parts(self):
+        return [
+            c.slug for c in self.get_ancestors()
+        ] + [self.slug]
+
+    def __unicode__(self):
+        return u" > ".join([
+            c.name for c in self.get_ancestors()
+        ] + [self.name])
 
     class Meta:
         verbose_name = _('Category')
@@ -75,8 +83,15 @@ class BaseItem(Slugged, Named, models.Model):
     manual = models.FileField(verbose_name=_('Manual'),
         upload_to='manuals', blank=True, null=True)
     category = models.ForeignKey(get_model_name('Category'),
-        verbose_name=_('Category'), related_name='items')
+        verbose_name=_('Primary Category'), related_name='items')
+    categories = models.ManyToManyField(get_model_name('Category'),
+        verbose_name=_('Extra Categories'), related_name='items_extra', null=True, blank=True)
     manufacturer = models.ForeignKey(get_model_name('Manufacturer'), related_name='items')
+
+    @property
+    def url_parts(self):
+        return self.category.url_parts + [self.slug]
+
 
     class Meta:
         verbose_name = _('Item Class')
@@ -109,7 +124,7 @@ class BaseItemAttribute(Ordered, models.Model):
 
 class BaseItemImage(Named, Ordered, models.Model):
     image = ImageField(verbose_name=_('Image'), upload_to='item_image')
-    item_class = models.ForeignKey(get_model_name('Item'), related_name='photos')
+    item = models.ForeignKey(get_model_name('Item'), related_name='images')
 
     def __unicode__(self):
         return self.image
