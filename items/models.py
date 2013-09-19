@@ -23,7 +23,7 @@ class Slugged(models.Model):
 
 
 class Named(models.Model):
-    name = models.SlugField(verbose_name=_('Name'))
+    name = models.CharField(max_length=255, verbose_name=_('Name'))
 
     def __unicode__(self):
         return self.name
