@@ -79,7 +79,7 @@ class BaseItem(Named, Slugged, models.Model):
     description = models.TextField(verbose_name=_('Description'),
         blank=True, null=True)
     unit_price = models.DecimalField(verbose_name=_('Unit Price'),
-        max_digits=32, decimal_places=4)
+        max_digits=32, decimal_places=4, blank=True, null=True)
     manual = models.FileField(verbose_name=_('Manual'),
         upload_to='manuals', blank=True, null=True)
     category = models.ForeignKey(get_model_name('Category'),
@@ -94,7 +94,10 @@ class BaseItem(Named, Slugged, models.Model):
 
     @property
     def primary_image(self):
-        return self.images.all()[0]
+        images = self.images.all()
+        if len(images) == 0:
+            return None
+        return images[0]
 
     class Meta:
         verbose_name = _('Item Class')
