@@ -87,6 +87,7 @@ class BaseItem(Named, Slugged, models.Model):
     categories = models.ManyToManyField(get_model_name('Category'),
         verbose_name=_('Extra Categories'), related_name='items_extra', null=True, blank=True)
     manufacturer = models.ForeignKey(get_model_name('Manufacturer'), related_name='items')
+    related = models.ManyToManyField(get_model_name('Item'), verbose_name=_('Related Items'), null=True, blank=True)
 
     @property
     def url_parts(self):
