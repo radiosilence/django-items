@@ -8,6 +8,7 @@ MODELS = (
     'Manufacturer',
     'Category',
     'Item',
+    'ItemVariation',
     'ItemAttributeClass',
     'ItemAttribute',
     'ItemImage',

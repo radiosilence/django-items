@@ -104,11 +104,22 @@ class BaseItem(Named, Slugged, models.Model):
         verbose_name_plural = _('Item Classes')
         abstract = True
 
+class BaseItemVariation(Ordered, models.Model):
+    name = models.CharField(verbose_name=_('Name'), max_length=255, blank=True, null=True)
+    item = models.ForeignKey(get_model_name('Item'), related_name='variations')
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _('Item Variation')
+        verbose_name_plural = _('Item Variations')
+
 
 class BaseItemAttributeClass(Named, models.Model):
     class Meta:
         verbose_name = _('Item Attribute Class')
-        verbose_name = _('Item Attribute Classes')
+        verbose_name_plural = _('Item Attribute Classes')
         abstract = True
 
 
@@ -116,8 +127,7 @@ class BaseItemAttribute(Ordered, models.Model):
     cls = models.ForeignKey(get_model_name('ItemAttributeClass'),
         verbose_name=_('Class'),  related_name="attributes")
     text = models.TextField(verbose_name=_('Text'))
-    item = models.ForeignKey(get_model_name('Item'), verbose_name=_('Item'),
-        related_name='attributes')
+    item_variation = models.ForeignKey(get_model_name('ItemVariation'), verbose_name=_('Item Variation'), related_name='attributes')
 
     def __unicode__(self):
         return self.text
@@ -184,6 +194,12 @@ if is_default('Item'):
     class Item(BaseItem):
         class Meta:
             managed = is_default('Item')
+
+
+if is_default('ItemVariation'):
+    class ItemVariation(BaseItemVariation):
+        class Meta:
+            managed = is_default('ItemVariation')
 
 
 if is_default('ItemAttributeClass'):
