@@ -52,12 +52,15 @@ class BaseManufacturer(Named, Slugged, models.Model):
 class BaseCategory(Named, Slugged, Ordered, MP_Node, models.Model):
     """ Category of the item class """
     node_order_by = ['order', 'name']
+    _url_parts = None
 
     @property
     def url_parts(self):
-        return [
-            c.slug for c in self.get_ancestors()
-        ] + [self.slug]
+        if not self._url_parts:
+            self._url_parts = [
+                c.slug for c in self.get_ancestors()
+            ] + [self.slug]
+        return self._url_parts
 
     def __unicode__(self):
         return u" > ".join([
@@ -68,6 +71,11 @@ class BaseCategory(Named, Slugged, Ordered, MP_Node, models.Model):
         verbose_name = _('Category')
         verbose_name_plural = _('Categories')
         abstract = True
+
+class BaseItemManager(models.Manager):
+    def get_query_set(self):
+        return super(BaseItemManager, self).get_query_set() \
+            .prefetch_related('variations')
 
 
 class BaseItem(Named, Slugged, models.Model):
@@ -89,6 +97,8 @@ class BaseItem(Named, Slugged, models.Model):
     manufacturer = models.ForeignKey(get_model_name('Manufacturer'), related_name='items')
     related = models.ManyToManyField(get_model_name('Item'), verbose_name=_('Related Items'), null=True, blank=True)
 
+    objects = BaseItemManager()
+
     @property
     def url_parts(self):
         return self.category.url_parts + [self.slug]
@@ -100,6 +110,13 @@ class BaseItem(Named, Slugged, models.Model):
             return None
         return images[0]
 
+    @property
+    def attribute_headers(self):
+        try:
+            return [k for k, v in self.varations.all()[0].attributes.items()]
+        except IndexError:
+            return []
+
     class Meta:
         verbose_name = _('Item Class')
         verbose_name_plural = _('Item Classes')
@@ -108,6 +125,17 @@ class BaseItem(Named, Slugged, models.Model):
 class BaseItemVariation(Ordered, models.Model):
     name = models.CharField(verbose_name=_('Name'), max_length=255, blank=True, null=True)
     item = models.ForeignKey(get_model_name('Item'), related_name='variations')
+    _attributes = None
+
+    @property
+    def attributes(self):
+        if self._attributes:
+            return self._attributes
+        
+        self._attributes = {}
+        for attr in get_model('ItemAttribute').objects.filter(item_variation=self):
+            self._attributes[attr.cls.name] = attr
+        return self._attributes
 
     def __unicode__(self):
         return self.name
@@ -124,11 +152,18 @@ class BaseItemAttributeClass(Named, models.Model):
         abstract = True
 
 
+class BaseItemAttributeManager(models.Manager):
+    def get_query_set(self):
+        return super(BaseItemAttributeManager, self).get_query_set() \
+            .select_related('cls')
+
 class BaseItemAttribute(Ordered, models.Model):
     cls = models.ForeignKey(get_model_name('ItemAttributeClass'),
         verbose_name=_('Class'),  related_name="attributes")
     text = models.TextField(verbose_name=_('Text'))
     item_variation = models.ForeignKey(get_model_name('ItemVariation'), verbose_name=_('Item Variation'), related_name='attributes')
+
+    objects = BaseItemAttributeManager()
 
     def __unicode__(self):
         return self.text
