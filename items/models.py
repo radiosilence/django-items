@@ -40,6 +40,22 @@ class Ordered(models.Model):
         abstract = True
 
 
+class Described(models.Model):
+    description = models.TextField(verbose_name=_('Description'),
+        blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+
+class Imaged(models.Model):
+    image = ImageField(verbose_name=_('Image'), upload_to='images',
+        null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
+
 class BaseManufacturer(Named, Slugged, models.Model):
     """ The manufacturer of an item class """
 
@@ -49,7 +65,7 @@ class BaseManufacturer(Named, Slugged, models.Model):
         abstract = True
 
 
-class BaseCategory(Named, Slugged, Ordered, MP_Node, models.Model):
+class BaseCategory(Named, Slugged, Ordered, Imaged, Described, MP_Node, models.Model):
     """ Category of the item class """
     node_order_by = ['order', 'name']
     _url_parts = None
@@ -78,13 +94,11 @@ class BaseItemManager(models.Manager):
             .prefetch_related('variations')
 
 
-class BaseItem(Named, Slugged, models.Model):
+class BaseItem(Named, Slugged, Described, models.Model):
     """ This is the model it all revolves around. """
     item_type = models.CharField(verbose_name=_('Item Type'),
         max_length=2, choices=ITEM_TYPES, default="UN")
     short_description = models.TextField(verbose_name=_('Short Description'),
-        blank=True, null=True)
-    description = models.TextField(verbose_name=_('Description'),
         blank=True, null=True)
     unit_price = models.DecimalField(verbose_name=_('Unit Price'),
         max_digits=32, decimal_places=4, blank=True, null=True)
@@ -174,8 +188,7 @@ class BaseItemAttribute(Ordered, models.Model):
         abstract = True
 
 
-class BaseItemImage(Named, Ordered, models.Model):
-    image = ImageField(verbose_name=_('Image'), upload_to='images')
+class BaseItemImage(Named, Ordered, Imaged, models.Model):
     item = models.ForeignKey(get_model_name('Item'), related_name='images')
 
     def __unicode__(self):
