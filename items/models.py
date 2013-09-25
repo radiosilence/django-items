@@ -175,7 +175,7 @@ class BaseItemAttribute(Ordered, models.Model):
 
 
 class BaseItemImage(Named, Ordered, models.Model):
-    image = ImageField(verbose_name=_('Image'), upload_to='item_image')
+    image = ImageField(verbose_name=_('Image'), upload_to='images')
     item = models.ForeignKey(get_model_name('Item'), related_name='images')
 
     def __unicode__(self):
