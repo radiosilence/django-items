@@ -56,6 +56,17 @@ class Imaged(models.Model):
         abstract = True
 
 
+class URLed(models.Model):
+    _url = models.CharField(max_length=512, null=True, blank=True)
+
+    def _update_url(self):
+        if hasattr(self, 'get_absolute_url'):
+            self._url = self.get_absolute_url()
+
+    class Meta:
+        abstract = True
+
+
 class BaseManufacturer(Named, Slugged, models.Model):
     """ The manufacturer of an item class """
 
@@ -65,10 +76,17 @@ class BaseManufacturer(Named, Slugged, models.Model):
         abstract = True
 
 
-class BaseCategory(Named, Slugged, Ordered, Imaged, Described, MP_Node, models.Model):
+class BaseCategory(Named, Slugged, Ordered, Imaged, Described, URLed, MP_Node, models.Model):
     """ Category of the item class """
     node_order_by = ['order', 'name']
     _url_parts = None
+
+    def save(self, *args, **kwargs):
+        self._update_url()
+        for item in self.items.all():
+            item.save()
+        super(BaseCategory, self).save(*args, **kwargs)
+
 
     @property
     def url_parts(self):
@@ -91,10 +109,10 @@ class BaseCategory(Named, Slugged, Ordered, Imaged, Described, MP_Node, models.M
 class BaseItemManager(models.Manager):
     def get_query_set(self):
         return super(BaseItemManager, self).get_query_set() \
-            .prefetch_related('variations')
+            .prefetch_related('variations').select_related('category')
 
 
-class BaseItem(Named, Slugged, Described, models.Model):
+class BaseItem(Named, Slugged, Described, URLed, models.Model):
     """ This is the model it all revolves around. """
     item_type = models.CharField(verbose_name=_('Item Type'),
         max_length=2, choices=ITEM_TYPES, default="UN")
@@ -111,18 +129,28 @@ class BaseItem(Named, Slugged, Described, models.Model):
     manufacturer = models.ForeignKey(get_model_name('Manufacturer'), related_name='items')
     related = models.ManyToManyField(get_model_name('Item'), verbose_name=_('Related Items'), null=True, blank=True)
 
+    _image = ImageField(upload_to='images', null=True, blank=True)
+
     objects = BaseItemManager()
+
+    def save(self, *args, **kwargs):
+        self._update_url()
+        self._image = self.image
+        super(BaseItem, self).save(*args, **kwargs)
 
     @property
     def url_parts(self):
         return self.category.url_parts + [self.slug]
 
     @property
-    def primary_image(self):
+    def image(self):
+        if self._image:
+            return self._image
+
         images = self.images.all()
         if len(images) == 0:
             return None
-        return images[0]
+        return images[0].image
 
     @property
     def attribute_headers(self):
