@@ -112,8 +112,11 @@ class BaseItemManager(models.Manager):
             .prefetch_related('attribute_rows').select_related('category')
 
 
-class BaseItem(Named, Slugged, Described, URLed, models.Model):
+class BaseItem(Named, Slugged, Described, URLed, Ordered, MP_Node, models.Model):
     """ This is the model it all revolves around. """
+    node_order_by = ['order', 'name']
+    _url_parts = None
+
     item_type = models.CharField(verbose_name=_('Item Type'),
         max_length=2, choices=ITEM_TYPES, default="UN")
     short_description = models.TextField(verbose_name=_('Short Description'),
