@@ -109,7 +109,7 @@ class BaseCategory(Named, Slugged, Ordered, Imaged, Described, URLed, MP_Node, m
 class BaseItemManager(models.Manager):
     def get_query_set(self):
         return super(BaseItemManager, self).get_query_set() \
-            .prefetch_related('variations').select_related('category')
+            .prefetch_related('attribute_rows').select_related('category')
 
 
 class BaseItem(Named, Slugged, Described, URLed, models.Model):
@@ -152,17 +152,11 @@ class BaseItem(Named, Slugged, Described, URLed, models.Model):
             return None
         return images[0].image
 
-    @property
-    def attribute_headers(self):
-        try:
-            return [k for k, v in self.varations.all()[0].attributes.items()]
-        except IndexError:
-            return []
-
     class Meta:
         verbose_name = _('Item Class')
         verbose_name_plural = _('Item Classes')
         abstract = True
+
 
 class BaseItemAttributeRow(Ordered, models.Model):
     name = models.CharField(verbose_name=_('Name'), max_length=255, blank=True, null=True)
@@ -171,20 +165,15 @@ class BaseItemAttributeRow(Ordered, models.Model):
 
     @property
     def attributes(self):
-        if self._attributes:
-            return self._attributes
-        
-        self._attributes = {}
-        for attr in get_model('ItemAttribute').objects.filter(item_variation=self):
-            self._attributes[attr.cls.name] = attr
-        return self._attributes
+        return get_model('ItemAttribute').objects.filter(item_attribute_row=self).order_by('order')
 
     def __unicode__(self):
         return self.name
 
     class Meta:
-        verbose_name = _('Item Variation')
-        verbose_name_plural = _('Item Variations')
+        verbose_name = _('Item Attribute Row')
+        verbose_name_plural = _('Item Attribute Rows')
+        ordering = ('order',)
 
 
 class BaseItemAttributeClass(Named, models.Model):
@@ -203,7 +192,7 @@ class BaseItemAttribute(Ordered, models.Model):
     cls = models.ForeignKey(get_model_name('ItemAttributeClass'),
         verbose_name=_('Class'),  related_name="attributes")
     text = models.TextField(verbose_name=_('Text'))
-    item_variation = models.ForeignKey(get_model_name('ItemAttributeRow'), verbose_name=_('Item Variation'), related_name='attributes')
+    item_attribute_row = models.ForeignKey(get_model_name('ItemAttributeRow'), verbose_name=_('Item Attribute Row'), related_name='attributes')
 
     objects = BaseItemAttributeManager()
 
@@ -213,6 +202,7 @@ class BaseItemAttribute(Ordered, models.Model):
     class Meta:
         verbose_name = _('Item Attribute')
         verbose_name_plural = _('Item Attributes')
+        ordering = ('order',)
         abstract = True
 
 
