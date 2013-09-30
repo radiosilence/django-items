@@ -164,9 +164,9 @@ class BaseItem(Named, Slugged, Described, URLed, models.Model):
         verbose_name_plural = _('Item Classes')
         abstract = True
 
-class BaseItemVariation(Ordered, models.Model):
+class BaseItemAttributeRow(Ordered, models.Model):
     name = models.CharField(verbose_name=_('Name'), max_length=255, blank=True, null=True)
-    item = models.ForeignKey(get_model_name('Item'), related_name='variations')
+    item = models.ForeignKey(get_model_name('Item'), related_name='attribute_rows')
     _attributes = None
 
     @property
@@ -203,7 +203,7 @@ class BaseItemAttribute(Ordered, models.Model):
     cls = models.ForeignKey(get_model_name('ItemAttributeClass'),
         verbose_name=_('Class'),  related_name="attributes")
     text = models.TextField(verbose_name=_('Text'))
-    item_variation = models.ForeignKey(get_model_name('ItemVariation'), verbose_name=_('Item Variation'), related_name='attributes')
+    item_variation = models.ForeignKey(get_model_name('ItemAttributeRow'), verbose_name=_('Item Variation'), related_name='attributes')
 
     objects = BaseItemAttributeManager()
 
@@ -273,10 +273,10 @@ if is_default('Item'):
             managed = is_default('Item')
 
 
-if is_default('ItemVariation'):
-    class ItemVariation(BaseItemVariation):
+if is_default('ItemAttributeRow'):
+    class ItemAttributeRow(BaseItemAttributeRow):
         class Meta:
-            managed = is_default('ItemVariation')
+            managed = is_default('ItemAttributeRow')
 
 
 if is_default('ItemAttributeClass'):
