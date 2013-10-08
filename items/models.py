@@ -169,11 +169,14 @@ class BaseItem(Named, Slugged, Described, URLed, Ordered, MP_Node, models.Model)
         for i, attribute in enumerate(rows[0].attributes.all()):
             row = []
             row.append(attribute.cls.name)
-            row += [
-                r.attributes.all()[i]
-                for r
-                in rows
-            ]
+            try:
+                row += [
+                    r.attributes.all()[i]
+                    for r
+                    in rows
+                ]
+            except IndexError:
+                row += u'-'
             new_rows.append(row)
 
         return new_rows
