@@ -87,6 +87,9 @@ class BaseCategory(Named, Slugged, Ordered, Imaged, Described, URLed, MP_Node, m
             item.save()
         super(BaseCategory, self).save(*args, **kwargs)
 
+    @property
+    def root(self):
+        return self.get_root()
 
     @property
     def url_parts(self):
