@@ -155,6 +155,26 @@ class BaseItem(Named, Slugged, Described, URLed, Ordered, MP_Node, models.Model)
             return None
         return images[0].image
 
+    @property
+    def attribute_columns(self):
+        """Nasty."""
+        rows = list(self.attribute_rows.all())
+        if len(rows) == 0:
+            return None
+
+        new_rows = []
+        for i, attribute in enumerate(rows[0].attributes.all()):
+            row = []
+            row.append(attribute.cls.name)
+            row += [
+                r.attributes.all()[i]
+                for r
+                in rows
+            ]
+            new_rows.append(row)
+
+        return new_rows
+
     class Meta:
         verbose_name = _('Item Class')
         verbose_name_plural = _('Item Classes')
